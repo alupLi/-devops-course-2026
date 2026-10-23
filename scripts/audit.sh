@@ -27,5 +27,17 @@ check "Политика по умолчанию deny" "deny (incoming)" "$(sudo 
 echo "[3] Учётные записи"
 awk -F: ' $3>=1000 && $3<65534 {printf " %s (uid=%s)\n",$1,$3}' /etc/passwd
 
+echo "[4] Веб-сервер"
+check "Конфигурация Nginx корректна" "0" "$(sudo nginx -t > /dev/null 2>&1; echo $?)"
+check "Сертификат действителен более 30 дней" "0" "$(openssl x509 -checkend 2592000 -noout -in /etc/ssl/certs/devops.crt > /dev/null 2>&1; echo $?)"
+check "Нет файлов с правом записи для всех" "" "$(sudo find /var/www/devops-site -perm -o+w 2>/dev/null)"
+check "Права ключа TLS равны 600" "600" "$(sudo stat -c '%a' /etc/ssl/private/devops.key)"
+
+echo "[5] Контейнеризация"
+check "Служба Docker активна" "active" "$(systemctl is-active docker)"
+check "Контейнер БД healthy" "healthy" "$(docker inspect -f '{{.State.Health.Status}}' app-db-1 2>/dev/null || echo 'not found')"
+check "Порты 5000 и 5432 только на 127.0.0.1" "0" "$(sudo ss -tlnp | grep -E ':(5000|5432)\b' | grep -v '127.0.0.1' | wc -l)"
+check "Права .env равны 600" "600" "$(stat -c '%a' ~/app/.env 2>/dev/null || echo 'not found')"
+
 echo "Пройдено: $PASS, не пройдено: $FAIL"
 [[ $FAIL -eq 0 ]] && exit 0 || exit 1
