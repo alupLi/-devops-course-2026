@@ -1,0 +1,5 @@
+app_image: "ghcr.io/alupli/devops-ci-app"
+app_tag: "d97ea6e88f7b03fb21f38b3951c4170369258e96"
+app_container_name: "devops-ci-app"
+app_host_port: 5000
+app_internal_port: 5000
