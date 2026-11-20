@@ -63,3 +63,16 @@
 - Публикуемые порты и адреса: 127.0.0.1:5000 (приложение). Порт 5432 не публикуется.
 - Именованные тома: app_db_data.
 - Конфигурация обратного прокси: location /app/ { proxy_pass http://127.0.0.1:5000/; }
+
+## 10. Ansible
+- Расположение проекта: ~/devops-course-2026/ansible
+- Управляющий узел: WSL (Ubuntu) на хосте
+- Управляемый узел: VM devops-vm (192.168.56.102:2222)
+- Inventory: bootstrap.ini (student), prod.ini (devops)
+- Роли: base (Docker), ssh (пользователь, ключ, UFW), nginx (reverse proxy), app (контейнер)
+- Образ GHCR: ghcr.io/alupli/devops-ci-app:d97ea6e88f7b03fb21f38b3951c4170369258e96
+- Порт контейнера: 5000 (публикуется на 127.0.0.1:5000)
+- Health endpoint: /health
+- Первый запуск: ansible-playbook -i inventory/bootstrap.ini site.yml --ask-pass --ask-become-pass
+- Повторный запуск: ansible-playbook -i inventory/prod.ini site.yml
+- Read-only аудит: ansible-playbook -i inventory/prod.ini verify.yml
